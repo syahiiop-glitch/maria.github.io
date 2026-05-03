@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ember & Grounds — Artisan Café</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5EFE0;
+    --dark: #1A1208;
+    --brown: #4A2C0A;
+    --caramel: #C07A2E;
+    --warm: #E8C98A;
+    --rust: #8B3A1A;
+    --fog: #EDE5D0;
+  }
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+background: var(–dark);
+color: var(–cream);
+font-family: ‘Cormorant Garamond’, serif;
+overflow-x: hidden;
+cursor: none;
+}
+
+/* Custom cursor */
+.cursor {
+width: 10px; height: 10px;
+background: var(–caramel);
+border-radius: 50%;
+position: fixed;
+top: 0; left: 0;
+pointer-events: none;
+z-index: 9999;
+transform: translate(-50%, -50%);
+transition: transform 0.1s ease, width 0.3s, height 0.3s, background 0.3s;
+mix-blend-mode: difference;
+}
+.cursor-ring {
+width: 36px; height: 36px;
+border: 1px solid var(–caramel);
+border-radius: 50%;
+position: fixed;
+top: 0; left: 0;
+pointer-events: none;
+z-index: 9998;
+transform: translate(-50%, -50%);
+transition: all 0.18s ease;
+opacity: 0.6;
+}
+
+/* NAV */
+nav {
+position: fixed; top: 0; left: 0; right: 0;
+z-index: 100;
+display: flex; justify-content: space-between; align-items: center;
+padding: 2rem 4rem;
+mix-blend-mode: normal;
+}
+.nav-logo {
+font-family: ‘Playfair Display’, serif;
+font-size: 1.1rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–warm);
+}
+.nav-links {
+display: flex; gap: 2.5rem;
+list-style: none;
+}
+.nav-links a {
+color: var(–cream);
+text-decoration: none;
+font-family: ‘DM Mono’, monospace;
+font-size: 0.7rem;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+opacity: 0.7;
+transition: opacity 0.3s, color 0.3s;
+}
+.nav-links a:hover { opacity: 1; color: var(–warm); }
+
+/* HERO */
+.hero {
+height: 100vh;
+position: relative;
+display: flex;
+align-items: flex-end;
+padding: 0 4rem 6rem;
+overflow: hidden;
+}
+
+.hero-bg {
+position: absolute; inset: 0;
+background:
+radial-gradient(ellipse 60% 80% at 70% 40%, rgba(74,44,10,0.7) 0%, transparent 70%),
+radial-gradient(ellipse 40% 60% at 20% 80%, rgba(139,58,26,0.4) 0%, transparent 60%),
+radial-gradient(ellipse 80% 40% at 50% 0%, rgba(192,122,46,0.15) 0%, transparent 50%),
+#1A1208;
+}
+
+/* Steam SVG animation */
+.steam-container {
+position: absolute;
+right: 18%;
+top: 15%;
+width: 120px;
+opacity: 0.4;
+}
+.steam-line {
+animation: steam 3s ease-in-out infinite;
+transform-origin: bottom;
+}
+.steam-line:nth-child(2) { animation-delay: 1s; }
+.steam-line:nth-child(3) { animation-delay: 2s; }
+@keyframes steam {
+0% { transform: scaleY(0) translateY(0); opacity: 0; }
+30% { opacity: 1; }
+100% { transform: scaleY(1.5) translateY(-40px); opacity: 0; }
+}
+
+/* Large cup illustration */
+.hero-cup {
+position: absolute;
+right: 8%;
+bottom: 8%;
+width: 320px;
+opacity: 0.12;
+filter: blur(0.5px);
+}
+
+/* Grain overlay */
+.grain {
+position: fixed; inset: 0;
+pointer-events: none;
+z-index: 200;
+opacity: 0.03;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 256 256’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23noise)’/%3E%3C/svg%3E”);
+background-size: 128px;
+}
+
+.hero-label {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.25em;
+text-transform: uppercase;
+color: var(–caramel);
+margin-bottom: 1.5rem;
+opacity: 0;
+animation: fadeUp 1s ease forwards 0.3s;
+}
+
+.hero-title {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(4rem, 9vw, 8rem);
+line-height: 0.9;
+font-weight: 400;
+opacity: 0;
+animation: fadeUp 1s ease forwards 0.6s;
+}
+.hero-title em {
+font-style: italic;
+color: var(–caramel);
+display: block;
+}
+
+.hero-sub {
+position: absolute;
+bottom: 6rem;
+right: 4rem;
+width: 260px;
+text-align: right;
+font-size: 1rem;
+line-height: 1.7;
+color: var(–cream);
+opacity: 0;
+animation: fadeUp 1s ease forwards 1s;
+}
+.hero-sub span {
+display: block;
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.2em;
+color: var(–caramel);
+margin-bottom: 0.5rem;
+}
+
+.scroll-hint {
+position: absolute;
+bottom: 2.5rem;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 0.5rem;
+opacity: 0;
+animation: fadeIn 1s forwards 1.5s;
+}
+.scroll-hint span {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.6rem;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(–caramel);
+opacity: 0.6;
+}
+.scroll-line {
+width: 1px; height: 50px;
+background: linear-gradient(to bottom, var(–caramel), transparent);
+animation: scrollPulse 2s ease infinite;
+}
+@keyframes scrollPulse {
+0%, 100% { transform: scaleY(1); opacity: 1; }
+50% { transform: scaleY(0.5); opacity: 0.3; }
+}
+
+/* ABOUT SECTION */
+.about {
+display: grid;
+grid-template-columns: 1fr 1fr;
+min-height: 80vh;
+border-top: 1px solid rgba(192,122,46,0.2);
+}
+
+.about-left {
+background: var(–fog);
+color: var(–dark);
+padding: 7rem 5rem;
+position: relative;
+overflow: hidden;
+}
+.about-left::before {
+content: ‘’;
+position: absolute;
+top: -40px; right: -40px;
+width: 200px; height: 200px;
+border-radius: 50%;
+background: radial-gradient(circle, var(–warm) 0%, transparent 70%);
+opacity: 0.3;
+}
+.section-number {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.3em;
+color: var(–rust);
+margin-bottom: 3rem;
+}
+.about-left h2 {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(2.5rem, 4vw, 3.5rem);
+font-weight: 400;
+line-height: 1.15;
+margin-bottom: 2rem;
+color: var(–brown);
+}
+.about-left h2 em { font-style: italic; color: var(–rust); }
+.about-left p {
+font-size: 1.1rem;
+line-height: 1.9;
+color: #5a3a1a;
+max-width: 380px;
+}
+
+.about-right {
+background: var(–brown);
+padding: 7rem 5rem;
+display: flex;
+flex-direction: column;
+justify-content: center;
+position: relative;
+overflow: hidden;
+}
+.about-right::after {
+content: ‘”’;
+position: absolute;
+bottom: -1rem;
+right: 3rem;
+font-family: ‘Playfair Display’, serif;
+font-size: 20rem;
+color: rgba(192,122,46,0.08);
+line-height: 1;
+pointer-events: none;
+}
+.quote {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(1.4rem, 2.5vw, 2rem);
+font-style: italic;
+line-height: 1.5;
+color: var(–warm);
+margin-bottom: 1.5rem;
+}
+.quote-author {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.25em;
+color: var(–caramel);
+opacity: 0.7;
+}
+
+/* MENU SECTION */
+.menu {
+padding: 8rem 4rem;
+background: var(–dark);
+position: relative;
+}
+.menu::before {
+content: ‘MENU’;
+position: absolute;
+top: 4rem; right: 3rem;
+font-family: ‘Playfair Display’, serif;
+font-size: 8rem;
+font-weight: 700;
+color: rgba(192,122,46,0.04);
+letter-spacing: 0.2em;
+pointer-events: none;
+user-select: none;
+}
+.menu-header {
+display: flex;
+justify-content: space-between;
+align-items: flex-end;
+margin-bottom: 5rem;
+}
+.menu-header h2 {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(2.5rem, 5vw, 4rem);
+font-weight: 400;
+color: var(–warm);
+}
+.menu-header h2 em { font-style: italic; color: var(–caramel); }
+.menu-header p {
+font-size: 0.9rem;
+color: var(–cream);
+opacity: 0.5;
+max-width: 220px;
+text-align: right;
+line-height: 1.7;
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.05em;
+}
+
+.menu-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 2px;
+}
+.menu-item {
+background: #1f1608;
+padding: 3rem 2.5rem;
+position: relative;
+overflow: hidden;
+transition: background 0.4s;
+cursor: default;
+}
+.menu-item:hover { background: #2a1e0a; }
+.menu-item::before {
+content: ‘’;
+position: absolute;
+bottom: 0; left: 0; right: 0;
+height: 2px;
+background: var(–caramel);
+transform: scaleX(0);
+transform-origin: left;
+transition: transform 0.4s ease;
+}
+.menu-item:hover::before { transform: scaleX(1); }
+
+.item-emoji {
+font-size: 2rem;
+margin-bottom: 1.5rem;
+display: block;
+}
+.item-name {
+font-family: ‘Playfair Display’, serif;
+font-size: 1.4rem;
+font-weight: 400;
+color: var(–warm);
+margin-bottom: 0.5rem;
+}
+.item-desc {
+font-size: 0.9rem;
+color: var(–cream);
+opacity: 0.5;
+line-height: 1.6;
+margin-bottom: 1.5rem;
+}
+.item-price {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.85rem;
+color: var(–caramel);
+letter-spacing: 0.1em;
+}
+
+/* HOURS & LOCATION */
+.info {
+display: grid;
+grid-template-columns: 1.2fr 1fr;
+background: var(–cream);
+color: var(–dark);
+}
+.info-left {
+padding: 7rem 5rem;
+border-right: 1px solid rgba(74,44,10,0.15);
+}
+.info-left h2 {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(2rem, 3.5vw, 3rem);
+font-weight: 400;
+margin-bottom: 3rem;
+color: var(–brown);
+}
+.info-left h2 em { font-style: italic; color: var(–rust); }
+
+.hours-table {
+width: 100%;
+border-collapse: collapse;
+}
+.hours-table tr {
+border-bottom: 1px solid rgba(74,44,10,0.1);
+}
+.hours-table td {
+padding: 1rem 0;
+font-size: 1rem;
+color: var(–brown);
+}
+.hours-table td:last-child {
+text-align: right;
+font-family: ‘DM Mono’, monospace;
+font-size: 0.75rem;
+letter-spacing: 0.1em;
+color: var(–rust);
+}
+.hours-table .closed { opacity: 0.4; }
+
+.info-right {
+padding: 7rem 5rem;
+background: var(–fog);
+}
+.info-right h2 {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(2rem, 3.5vw, 3rem);
+font-weight: 400;
+margin-bottom: 3rem;
+color: var(–brown);
+}
+.info-right h2 em { font-style: italic; color: var(–rust); }
+.address-block {
+margin-bottom: 3rem;
+}
+.address-block p {
+font-size: 1.05rem;
+line-height: 2;
+color: var(–brown);
+}
+.address-block .label {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.6rem;
+letter-spacing: 0.3em;
+text-transform: uppercase;
+color: var(–rust);
+margin-bottom: 0.5rem;
+display: block;
+}
+
+/* CTA */
+.cta {
+background: var(–brown);
+padding: 8rem 4rem;
+text-align: center;
+position: relative;
+overflow: hidden;
+}
+.cta::before {
+content: ‘’;
+position: absolute; inset: 0;
+background: radial-gradient(ellipse 60% 80% at 50% 100%, rgba(192,122,46,0.2), transparent);
+}
+.cta h2 {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(3rem, 6vw, 5.5rem);
+font-weight: 400;
+line-height: 1;
+color: var(–cream);
+margin-bottom: 1rem;
+position: relative;
+}
+.cta h2 em { font-style: italic; color: var(–warm); }
+.cta p {
+font-size: 1rem;
+color: var(–cream);
+opacity: 0.6;
+margin-bottom: 3rem;
+position: relative;
+font-size: 0.85rem;
+font-family: ‘DM Mono’, monospace;
+letter-spacing: 0.1em;
+}
+.btn {
+display: inline-block;
+padding: 1.1rem 3rem;
+background: var(–caramel);
+color: var(–dark);
+font-family: ‘DM Mono’, monospace;
+font-size: 0.7rem;
+letter-spacing: 0.25em;
+text-transform: uppercase;
+text-decoration: none;
+position: relative;
+transition: all 0.3s;
+cursor: none;
+}
+.btn:hover {
+background: var(–warm);
+transform: translateY(-2px);
+box-shadow: 0 10px 30px rgba(192,122,46,0.3);
+}
+
+/* FOOTER */
+footer {
+background: #0f0b05;
+padding: 3rem 4rem;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-top: 1px solid rgba(192,122,46,0.1);
+}
+.footer-logo {
+font-family: ‘Playfair Display’, serif;
+font-size: 1rem;
+color: var(–caramel);
+letter-spacing: 0.15em;
+}
+.footer-copy {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.6rem;
+color: var(–cream);
+opacity: 0.25;
+letter-spacing: 0.1em;
+}
+.footer-social {
+display: flex;
+gap: 1.5rem;
+}
+.footer-social a {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.6rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–cream);
+text-decoration: none;
+opacity: 0.4;
+transition: opacity 0.3s, color 0.3s;
+cursor: none;
+}
+.footer-social a:hover { opacity: 1; color: var(–caramel); }
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+from { opacity: 0; transform: translateY(30px); }
+to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+
+.reveal {
+opacity: 0;
+transform: translateY(40px);
+transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+opacity: 1;
+transform: translateY(0);
+}
+
+/* Decorative divider */
+.divider {
+display: flex;
+align-items: center;
+gap: 1rem;
+margin-bottom: 2rem;
+}
+.divider-line {
+height: 1px;
+width: 50px;
+background: var(–caramel);
+opacity: 0.5;
+}
+.divider-dot {
+width: 4px; height: 4px;
+border-radius: 50%;
+background: var(–caramel);
+}
+
+@media (max-width: 768px) {
+nav { padding: 1.5rem 2rem; }
+.nav-links { display: none; }
+.hero { padding: 0 2rem 5rem; }
+.about { grid-template-columns: 1fr; }
+.about-left, .about-right { padding: 5rem 2rem; }
+.menu { padding: 5rem 2rem; }
+.menu-grid { grid-template-columns: 1fr; gap: 2px; }
+.info { grid-template-columns: 1fr; }
+.info-left, .info-right { padding: 5rem 2rem; }
+.cta { padding: 6rem 2rem; }
+footer { flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem; }
+.hero-sub { position: relative; bottom: auto; right: auto; text-align: left; width: 100%; margin-top: 2rem; }
+body { cursor: auto; }
+.cursor, .cursor-ring { display: none; }
+}
+</style>
+
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+
+<nav>
+  <div class="nav-logo">Ember & Grounds</div>
+  <ul class="nav-links">
+    <li><a href="#about">Story</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#visit">Visit</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+
+<section class="hero">
+  <div class="hero-bg"></div>
+
+  <!-- Steam effect -->
+
+  <div class="steam-container">
+    <svg width="120" height="200" viewBox="0 0 120 200">
+      <path class="steam-line" d="M60 180 Q40 140 60 100 Q80 60 60 20" stroke="#E8C98A" stroke-width="2" fill="none" opacity="0.6"/>
+      <path class="steam-line" d="M40 180 Q20 140 40 100 Q60 60 40 20" stroke="#E8C98A" stroke-width="1.5" fill="none" opacity="0.4"/>
+      <path class="steam-line" d="M80 180 Q100 140 80 100 Q60 60 80 20" stroke="#E8C98A" stroke-width="1.5" fill="none" opacity="0.4"/>
+    </svg>
+  </div>
+
+  <!-- Cup illustration -->
+
+  <svg class="hero-cup" viewBox="0 0 300 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="150" cy="60" rx="100" ry="20" stroke="#E8C98A" stroke-width="2"/>
+    <path d="M50 60 L70 280 H230 L250 60" stroke="#E8C98A" stroke-width="2" fill="none"/>
+    <ellipse cx="150" cy="280" rx="80" ry="15" stroke="#E8C98A" stroke-width="2"/>
+    <path d="M250 100 Q300 130 280 170 Q260 210 230 195" stroke="#E8C98A" stroke-width="2" fill="none"/>
+    <ellipse cx="150" cy="65" rx="90" ry="15" fill="#E8C98A" opacity="0.3"/>
+    <ellipse cx="150" cy="340" rx="110" ry="10" fill="#E8C98A" opacity="0.1"/>
+  </svg>
+
+  <div>
+    <p class="hero-label">Est. 2019 &nbsp;·&nbsp; Artisan Coffee & Pastries</p>
+    <h1 class="hero-title">
+      Ember<br>
+      <em>&amp; Grounds</em>
+    </h1>
+  </div>
+
+  <div class="hero-sub">
+    <span>Where mornings begin</span>
+    Slow-roasted single origins, house-baked pastries, and a corner seat that feels like yours.
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+
+<section class="about" id="about">
+  <div class="about-left reveal">
+    <p class="section-number">01 — Our Story</p>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-dot"></div>
+    </div>
+    <h2>A small café<br>with <em>big</em> heart</h2>
+    <p>
+      We opened our doors believing that a great cup of coffee is more than a drink — 
+      it's a ritual, a pause, a moment that belongs entirely to you. Every bean is 
+      sourced directly from small farms and roasted in-house each morning.
+    </p>
+  </div>
+  <div class="about-right reveal">
+    <p class="quote">"The best conversations happen over coffee that actually tastes like something."</p>
+    <p class="quote-author">— Maria, founder</p>
+  </div>
+</section>
+
+<!-- MENU -->
+
+<section class="menu" id="menu">
+  <div class="menu-header reveal">
+    <h2>The <em>Menu</em></h2>
+    <p>All pastries baked fresh daily. Seasonal specials on the chalkboard.</p>
+  </div>
+
+  <div class="menu-grid">
+    <div class="menu-item reveal">
+      <span class="item-emoji">☕</span>
+      <p class="item-name">Espresso</p>
+      <p class="item-desc">Double shot, crema-forward, Ethiopian Yirgacheffe</p>
+      <p class="item-price">.50</p>
+    </div>
+    <div class="menu-item reveal">
+      <span class="item-emoji">🥛</span>
+      <p class="item-name">Flat White</p>
+      <p class="item-desc">Silky microfoam, ratio-perfect, oat milk available</p>
+      <p class="item-price">.00</p>
+    </div>
+    <div class="menu-item reveal">
+      <span class="item-emoji">🧊</span>
+      <p class="item-name">Cold Brew</p>
+      <p class="item-desc">18-hour steep, served over crystal clear ice</p>
+      <p class="item-price">.50</p>
+    </div>
+    <div class="menu-item reveal">
+      <span class="item-emoji">🥐</span>
+      <p class="item-name">Butter Croissant</p>
+      <p class="item-desc">Laminated dough, baked 6am daily, flaky perfection</p>
+      <p class="item-price">.00</p>
+    </div>
+    <div class="menu-item reveal">
+      <span class="item-emoji">🍋</span>
+      <p class="item-name">Lemon Tart</p>
+      <p class="item-desc">House curd, shortcrust shell, seasonal zest</p>
+      <p class="item-price">.50</p>
+    </div>
+    <div class="menu-item reveal">
+      <span class="item-emoji">🍫</span>
+      <p class="item-name">Brownie</p>
+      <p class="item-desc">Dark chocolate, walnut, sea salt finish</p>
+      <p class="item-price">.50</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOURS & LOCATION -->
+
+<section class="info" id="visit">
+  <div class="info-left reveal">
+    <p class="section-number">02 — Hours</p>
+    <h2>When to <em>find us</em></h2>
+    <table class="hours-table">
+      <tr><td>Monday – Friday</td><td>7:00 AM – 6:00 PM</td></tr>
+      <tr><td>Saturday</td><td>8:00 AM – 5:00 PM</td></tr>
+      <tr><td>Sunday</td><td>9:00 AM – 3:00 PM</td></tr>
+      <tr class="closed"><td>Public Holidays</td><td>Closed</td></tr>
+    </table>
+  </div>
+  <div class="info-right reveal">
+    <p class="section-number">03 — Visit</p>
+    <h2>Where we <em>are</em></h2>
+    <div class="address-block">
+      <span class="label">Address</span>
+      <p>12 Maple Lane<br>Brooklyn, NY 11201</p>
+    </div>
+    <div class="address-block">
+      <span class="label">Contact</span>
+      <p>hello@emberandgrounds.com<br>(718) 555-0194</p>
+    </div>
+    <div class="address-block">
+      <span class="label">Parking</span>
+      <p>Street parking available<br>Bike rack at entrance</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+
+<section class="cta">
+  <h2>Come in for<br><em>a cup</em></h2>
+  <p>No reservation needed. Just show up.</p>
+  <a href="mailto:hello@emberandgrounds.com" class="btn">Get in Touch</a>
+</section>
+
+<!-- FOOTER -->
+
+<footer>
+  <div class="footer-logo">Ember & Grounds</div>
+  <p class="footer-copy">© 2026 Ember & Grounds. All rights reserved.</p>
+  <div class="footer-social">
+    <a href="#">Instagram</a>
+    <a href="#">Facebook</a>
+    <a href="#">Maps</a>
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
